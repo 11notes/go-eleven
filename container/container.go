@@ -29,7 +29,7 @@ func (c *Container) GetSecret(env string, envPath string) (string, error){
 }
 
 // merges default entrypoint command and user provided command
-func (c *Container) CommandMerge(d []string) []string{
+func (c *Container) MergeCommand(d []string) []string{
 	if(len(os.Args) > 0){
 		args := os.Args[1:]
 		for _, value := range args{
@@ -40,14 +40,14 @@ func (c *Container) CommandMerge(d []string) []string{
 }
 
 // replaces variables inside a file
-func (c *Container) FileContentReplace(file string, r map[string]interface{}) error{
+func (c *Container) FileContentReplace(file string, v map[string]interface{}) error{
 	// open file
 	text, err := (&util.Util{}).ReadFile(file)
 	if err != nil {
 		return err
 	}
 
-	text = (&util.Util{}).StringReplace(text, r)
+	text = (&util.Util{}).StringReplaceVar(text, v)
 
 	// write file
 	err = (&util.Util{}).WriteFile(file, text)

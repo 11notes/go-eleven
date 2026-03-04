@@ -10,6 +10,8 @@ import (
 	"errors"
 	"regexp"
 	"fmt"
+	"crypto/sha256"
+	"time"
 )
 
 type Util struct{}
@@ -93,7 +95,7 @@ func (c *Util) Run(bin string, params []string) (string, error){
 }
 
 // replace all variables in a string
-func (c *Util) StringReplace(str string, r map[string]interface{}) string{
+func (c *Util) StringReplaceVar(str string, r map[string]interface{}) string{
 	// replace all variables
 	for key, value := range r{
 		str = string(regexp.MustCompile(fmt.Sprintf(`\${%s}`, key)).ReplaceAllString(str, fmt.Sprintf("%s", value)))
@@ -106,4 +108,52 @@ func (c *Util) StringReplace(str string, r map[string]interface{}) string{
 	}
 
 	return str
+}
+
+// check if string is present in file
+func (c *Util) FileContains(file string, str string) (bool, error){
+	// open file
+	text, err := c.ReadFile(file)
+	if err != nil {
+		return false, err
+	}
+
+	// check for string
+	return strings.Contains(text, str), nil
+}
+
+// create random default password made up of four blocks containing 5 random characters
+func (c *Util) Password() string{
+	str := fmt.Sprintf("%x", sha256.Sum256([]byte(fmt.Sprintf("%x", time.Now().Unix()))))
+	m := regexp.MustCompile(`.{1,5}`).FindAllString(str, -1)
+	return strings.Join(m[0:3], ".")
+}
+
+// replace variables in a file
+func (c *Util) FileReplaceStrings(file string, str map[string]interface{}) (bool, error){
+	// set initial state
+	replaced := false
+
+	// open file
+	text, err := c.ReadFile(file)
+	if err != nil {
+		return false, err
+	}
+
+	// replace all variables
+	for key, value := range str{
+		if strings.Contains(text, key) {
+			replaced = true
+			text = strings.ReplaceAll(text, key, fmt.Sprintf("%s", value))
+		}
+	}
+
+	// write file
+	err = c.WriteFile(file, text)
+	if err != nil {
+		return false, err
+	}
+
+	// return
+	return replaced, nil
 }
