@@ -5,6 +5,7 @@ import (
 	"os"
 	"io/ioutil"
 	"strings"
+	"syscall"
 
 	"github.com/11notes/go-eleven/util"
 )
@@ -47,6 +48,7 @@ func (c *Container) FileContentReplace(file string, v map[string]interface{}) er
 		return err
 	}
 
+	// replace all variables in file
 	text = (&util.Util{}).StringReplaceVar(text, v)
 
 	// write file
@@ -76,5 +78,26 @@ func (c *Container) EnvToFile(env string, path string) error{
 		return (&util.Util{}).WriteFile(path, value)
 	}else{
 		return errors.New(env + " does not exist!")
+	}
+}
+
+// creates a certificate (needs distroless openssl present)
+func (c *Container) CreateCert(key string, crt string) error{
+	_, err := (&util.Util{}).Run("/usr/local/bin/openssl", []string{"req", "-x509", "-newkey", "rsa:4096", "-sha256", "-days", "3650", "-nodes", "-keyout", key, "-out", crt, "-subj", "/CN=" + os.Getenv("HOSTNAME"), "-addext", "subjectAltName=DNS:" + os.Getenv("HOSTNAME")})
+	return err
+}
+
+// creates a certificate (needs distroless openssl present) signed by a Root CA
+func (c *Container) CreateCertSigned(key string, crt string, caKey string, caCrt string) error{
+	_, err := (&util.Util{}).Run("/usr/local/bin/openssl", []string{"req", "-x509", "-newkey", "rsa:4096", "-sha256", "-days", "3650", "-nodes", "-keyout", key, "-out", crt, "-subj", "/CN=" + os.Getenv("HOSTNAME"), "-CA", caCrt, "-CAkey", caKey, "-addext", "subjectAltName=DNS:" + os.Getenv("HOSTNAME")})
+	return err
+}
+
+// starts the main process with arguments provided
+func (c *Container) Run(path string, bin string, args []string){
+	(&util.Util{}).Log("DBG", "%#v", map[string]any{"path": path, "bin": bin, "args": args})
+	(&util.Util{}).Log("START", "")
+	if err := syscall.Exec(path + "/" + bin, append([]string{bin}, args[:]...), os.Environ()); err != nil {
+		os.Exit(1)
 	}
 }
