@@ -12,9 +12,49 @@ import (
 	"fmt"
 	"crypto/sha256"
 	"time"
+	"reflect"
 )
 
 type Util struct{}
+
+var (
+	debug bool = false
+)
+
+// output log in json format with time current stamp and simple string message
+func (c *Util) Log(t string, m string, args ...interface{}){
+	if(t == "DBG" && debug){
+		// skip debug logic on subsequent DBG calls from internal functions
+		fmt.Println(fmt.Sprintf(`{"time":"%s","type":"%s","msg":"%s"}`, time.Now().Format("2006-01-02T15:04:05.000Z"), t, fmt.Sprintf(m, args...)))
+	}else{
+		l := "INF"
+		p := true
+		switch {
+			case regexp.MustCompile(`(?i)DEBUG|DBG|DEB`).MatchString(t): l = "DBG"
+			case regexp.MustCompile(`(?i)INFO|INF|IN`).MatchString(t): l = "INF"
+			case regexp.MustCompile(`(?i)WARNING|WARN|WRN`).MatchString(t): l = "WRN"
+			case regexp.MustCompile(`(?i)ERROR|ERR`).MatchString(t): l = "ERR"
+			case regexp.MustCompile(`(?i)START`).MatchString(t): m = fmt.Sprintf("starting %s v%s", os.Getenv("APP_NAME"), os.Getenv("APP_VERSION"))
+			case regexp.MustCompile(`(?i)PATCH|FIX`).MatchString(t): l = "FIX"
+		}
+		if(l == "DBG"){
+			if _, ok := os.LookupEnv("DEBUG"); !ok {
+				p = false
+			}else{
+				debug = true
+			}
+		}
+		if(p){
+			fmt.Println(fmt.Sprintf(`{"time":"%s","type":"%s","msg":"%s"}`, time.Now().Format("2006-01-02T15:04:05.000Z"), l, fmt.Sprintf(m, args...)))
+		}
+	}
+}
+
+// output log in json format with time current stamp and simple string message and exit process with exit code 1 error
+func (c *Util) LogFatal(m string, args ...interface{}){
+	c.Log("ERR", m, args...)
+	os.Exit(1)
+}
 
 // reads a file if it exists and returns the content of the file
 func (c *Util) ReadFile(path string) (string, error){
@@ -131,6 +171,8 @@ func (c *Util) Password() string{
 
 // replace variables in a file
 func (c *Util) FileReplaceStrings(file string, str map[string]interface{}) (bool, error){
+	c.Log("DBG", "%#v", map[string]any{"file": file, "str": str})
+
 	// set initial state
 	replaced := false
 
@@ -156,4 +198,9 @@ func (c *Util) FileReplaceStrings(file string, str map[string]interface{}) (bool
 
 	// return
 	return replaced, nil
+}
+
+// checks if an interface is nil (empty)
+func (c *Util) IfIsNil(i interface{}) bool {
+	return i == nil || reflect.ValueOf(i).IsNil()  
 }
