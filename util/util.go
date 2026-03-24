@@ -13,6 +13,7 @@ import (
 	"crypto/sha256"
 	"time"
 	"reflect"
+	"crypto/rand"
 )
 
 type Util struct{}
@@ -203,4 +204,14 @@ func (c *Util) FileReplaceStrings(file string, str map[string]interface{}) (bool
 // checks if an interface is nil (empty)
 func (c *Util) IfIsNil(i interface{}) bool {
 	return i == nil || reflect.ValueOf(i).IsNil()  
+}
+
+// generate random n bytes
+func (c *Util) GenerateRandomBytes(n int) ([]byte, error) {
+	b := make([]byte, n)
+	_, err := rand.Read(b)
+	if err != nil {
+		return nil, err
+	}
+	return b, nil
 }
