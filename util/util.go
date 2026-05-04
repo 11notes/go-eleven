@@ -14,6 +14,7 @@ import (
 	"time"
 	"reflect"
 	"crypto/rand"
+	"net"
 )
 
 type Util struct{}
@@ -214,4 +215,16 @@ func (c *Util) GenerateRandomBytes(n int) ([]byte, error) {
 		return nil, err
 	}
 	return b, nil
+}
+
+// lookup an FQDN and return the first IP found
+func (c *Util) LookupIP(fqdn string) (string, error) {
+	ips, err := net.LookupIP(fqdn)
+	if err != nil {
+		return "", err
+	}
+	if len(ips) == 0 {
+		return "", errors.New("NXDOMAIN")
+	}
+	return ips[0].String(), nil
 }
