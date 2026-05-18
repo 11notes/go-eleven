@@ -15,6 +15,7 @@ import (
 	"reflect"
 	"crypto/rand"
 	"net"
+	"encoding/base64"
 )
 
 type Util struct{}
@@ -215,6 +216,15 @@ func (c *Util) GenerateRandomBytes(n int) ([]byte, error) {
 		return nil, err
 	}
 	return b, nil
+}
+
+// generate random base64 from n bytes
+func (c *Util) GenerateRandomBase64(n int) (string, error) {
+	b, err := c.GenerateRandomBytes(n)
+	if err != nil {
+		return "", err
+	}
+	return base64.StdEncoding.EncodeToString(b), nil
 }
 
 // lookup an FQDN and return the first IP found
