@@ -142,6 +142,7 @@ func (c *Util) StringReplaceVar(str string, r map[string]interface{}) string{
 	// replace all variables
 	for key, value := range r{
 		str = string(regexp.MustCompile(fmt.Sprintf(`\${%s}`, key)).ReplaceAllString(str, fmt.Sprintf("%s", value)))
+		str = string(regexp.MustCompile(fmt.Sprintf(`\$%s`, key)).ReplaceAllString(str, fmt.Sprintf("%s", value)))
 	}
 
 	// replace all not set variables with an empty string
