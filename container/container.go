@@ -98,7 +98,7 @@ func (c *Container) Run(path string, bin string, args []string){
 	(&util.Util{}).Log("DBG", "%#v", map[string]any{"path": path, "bin": bin, "args": args})
 	(&util.Util{}).Log("START", "")
 	if err := syscall.Exec(path + "/" + bin, append([]string{bin}, args[:]...), os.Environ()); err != nil {
-		os.Exit(1)
+		(&util.Util{}).LogFatal("%s", err)
 	}
 }
 
@@ -107,6 +107,6 @@ func (c *Container) RunAbsolute(bin string, args []string){
 	(&util.Util{}).Log("DBG", "%#v", map[string]any{"bin": bin, "args": args})
 	(&util.Util{}).Log("START", "")
 	if err := syscall.Exec(bin, append([]string{bin}, args[:]...), os.Environ()); err != nil {
-		os.Exit(1)
+		(&util.Util{}).LogFatal("%s", err)
 	}
 }
