@@ -138,6 +138,13 @@ func (c *Util) Run(bin string, params []string, env []string) (string, error){
 	return strings.Join(out, " "), nil
 }
 
+// run an external program and replace the existing process with it
+func (c *Util) Exec(path string, bin string, args []string, env []string){
+	if err := syscall.Exec(path + "/" + bin, append([]string{bin}, args[:]...), append(os.Environ(), env[:]...)); err != nil {
+		c.LogFatal("%s", err)
+	}
+}
+
 // replace all variables in a string
 func (c *Util) StringReplaceVar(str string, r map[string]interface{}) string{
 	// replace all variables
