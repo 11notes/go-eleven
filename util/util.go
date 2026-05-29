@@ -145,6 +145,13 @@ func (c *Util) Exec(path string, bin string, args []string, env []string){
 	}
 }
 
+// run an external program (absolute path) and replace the existing process with it
+func (c *Util) ExecAbsolute(path string, args []string, env []string){
+	if err := syscall.Exec(path, args, append(os.Environ(), env[:]...)); err != nil {
+		c.LogFatal("%s", err)
+	}
+}
+
 // replace all variables in a string
 func (c *Util) StringReplaceVar(str string, r map[string]interface{}) string{
 	// replace all variables
