@@ -111,9 +111,10 @@ func (c *Util) GetEnvFile(path string, fallback string) string{
 }
 
 // run an external program and return output
-func (c *Util) Run(bin string, params []string) (string, error){
+func (c *Util) Run(bin string, params []string, env []string) (string, error){
 	cmd := exec.Command(bin, params...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid:true}
+	cmd.Env = append(os.Environ(), env[:]...)
 
 	stdout, _ := cmd.StdoutPipe()
 	stderr, _ := cmd.StderrPipe()
