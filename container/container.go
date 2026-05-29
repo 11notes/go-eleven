@@ -83,13 +83,13 @@ func (c *Container) EnvToFile(env string, path string) error{
 
 // creates a certificate (needs distroless openssl present)
 func (c *Container) CreateCert(key string, crt string) error{
-	_, err := (&util.Util{}).Run("/usr/local/bin/openssl", []string{"req", "-x509", "-newkey", "rsa:4096", "-sha256", "-days", "3650", "-nodes", "-keyout", key, "-out", crt, "-subj", "/CN=" + os.Getenv("HOSTNAME"), "-addext", "subjectAltName=DNS:" + os.Getenv("HOSTNAME")})
+	_, err := (&util.Util{}).Run("/usr/local/bin/openssl", []string{"req", "-x509", "-newkey", "rsa:4096", "-sha256", "-days", "3650", "-nodes", "-keyout", key, "-out", crt, "-subj", "/CN=" + os.Getenv("HOSTNAME"), "-addext", "subjectAltName=DNS:" + os.Getenv("HOSTNAME"), []string{}})
 	return err
 }
 
 // creates a certificate (needs distroless openssl present) signed by a Root CA
 func (c *Container) CreateCertSigned(key string, crt string, caKey string, caCrt string) error{
-	_, err := (&util.Util{}).Run("/usr/local/bin/openssl", []string{"req", "-x509", "-newkey", "rsa:4096", "-sha256", "-days", "3650", "-nodes", "-keyout", key, "-out", crt, "-subj", "/CN=" + os.Getenv("HOSTNAME"), "-CA", caCrt, "-CAkey", caKey, "-addext", "subjectAltName=DNS:" + os.Getenv("HOSTNAME")})
+	_, err := (&util.Util{}).Run("/usr/local/bin/openssl", []string{"req", "-x509", "-newkey", "rsa:4096", "-sha256", "-days", "3650", "-nodes", "-keyout", key, "-out", crt, "-subj", "/CN=" + os.Getenv("HOSTNAME"), "-CA", caCrt, "-CAkey", caKey, "-addext", "subjectAltName=DNS:" + os.Getenv("HOSTNAME"), []string{}})
 	return err
 }
 
