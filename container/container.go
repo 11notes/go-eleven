@@ -94,19 +94,19 @@ func (c *Container) CreateCertSigned(key string, crt string, caKey string, caCrt
 }
 
 // starts the main process with arguments provided
-func (c *Container) Run(path string, bin string, args []string){
-	(&util.Util{}).Log("DBG", "%#v", map[string]any{"path": path, "bin": bin, "args": args})
+func (c *Container) Run(path string, bin string, args []string, env []string){
+	(&util.Util{}).Log("DBG", "%#v", map[string]any{"path": path, "bin": bin, "args": args, "env": env})
 	(&util.Util{}).Log("START", "")
-	if err := syscall.Exec(path + "/" + bin, append([]string{bin}, args[:]...), os.Environ()); err != nil {
+	if err := syscall.Exec(path + "/" + bin, append([]string{bin}, args[:]...), append(os.Environ(), env[:]...)); err != nil {
 		(&util.Util{}).LogFatal("%s", err)
 	}
 }
 
 // starts the main process with arguments provided (binary must be absolute path)
-func (c *Container) RunAbsolute(bin string, args []string){
-	(&util.Util{}).Log("DBG", "%#v", map[string]any{"bin": bin, "args": args})
+func (c *Container) RunAbsolute(bin string, args []string, env []string){
+	(&util.Util{}).Log("DBG", "%#v", map[string]any{"bin": bin, "args": args, "env": env})
 	(&util.Util{}).Log("START", "")
-	if err := syscall.Exec(bin, append([]string{bin}, args[:]...), os.Environ()); err != nil {
+	if err := syscall.Exec(bin, append([]string{bin}, args[:]...), append(os.Environ(), env[:]...)); err != nil {
 		(&util.Util{}).LogFatal("%s", err)
 	}
 }
