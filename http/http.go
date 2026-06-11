@@ -22,22 +22,22 @@ func (c *HTTP) PostJson(url string, body any, skipSSL bool) (string, error){
 	jsonBody, _ := json.Marshal(body)
 	res, err := client.Post(url, "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	defer res.Body.Close()
 	if res.StatusCode >= 100 && res.StatusCode <= 399 {
 		body, err := ioutil.ReadAll(res.Body)
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 		contentType := strings.Join(res.Header["Content-Type"], "")
 		if strings.HasPrefix(contentType, "application/json") {
 			return body, nil
 		}else{
-			return nil, errors.New(fmt.Sprintf("HTTP content-type is not json: %s", contentType))
+			return "", errors.New(fmt.Sprintf("HTTP content-type is not json: %s", contentType))
 		}
 	}else{
-		return nil, errors.New(fmt.Sprintf("HTTP post request failed: %d", res.StatusCode))
+		return "", errors.New(fmt.Sprintf("HTTP post request failed: %d", res.StatusCode))
 	}
 }
 
@@ -49,21 +49,21 @@ func (c *HTTP) GetJson(url string, skipSSL bool) (string, error){
 	client := &http.Client{Transport: tr}
 	res, err := client.Get(url)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	defer res.Body.Close()
 	if res.StatusCode >= 100 && res.StatusCode <= 399 {
 		body, err := ioutil.ReadAll(res.Body)
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 		contentType := strings.Join(res.Header["Content-Type"], "")
 		if strings.HasPrefix(contentType, "application/json") {
 			return body, nil
 		}else{
-			return nil, errors.New(fmt.Sprintf("HTTP content-type is not json: %s", contentType))
+			return "", errors.New(fmt.Sprintf("HTTP content-type is not json: %s", contentType))
 		}
 	}else{
-		return nil, errors.New(fmt.Sprintf("HTTP get request failed: %d", res.StatusCode))
+		return "", errors.New(fmt.Sprintf("HTTP get request failed: %d", res.StatusCode))
 	}
 }
