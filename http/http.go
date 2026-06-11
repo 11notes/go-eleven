@@ -7,15 +7,20 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"crypto/tls"
 	"strings"
 )
 
 type HTTP struct{}
 
 // tries to post json data to an URL and expects a json return
-func (c *HTTP) PostJson(url string, body any) (any, error){
+func (c *HTTP) PostJson(url string, body any, skipSSL bool) (any, error){
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipSSL},
+	}
+	client := &http.Client{Transport: tr}
 	jsonBody, _ := json.Marshal(body)
-	res, err := http.Post(url, "application/json", bytes.NewBuffer(jsonBody))
+	res, err := client.Post(url, "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return nil, err
 	}
@@ -39,8 +44,12 @@ func (c *HTTP) PostJson(url string, body any) (any, error){
 }
 
 // tries to get json data from an URL
-func (c *HTTP) GetJson(url string) (any, error){
-	res, err := http.Get(url)
+func (c *HTTP) GetJson(url string, skipSSL bool) (any, error){
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipSSL},
+	}
+	client := &http.Client{Transport: tr}
+	res, err := client.Get(url)
 	if err != nil {
 		return nil, err
 	}
