@@ -10,13 +10,10 @@ import (
 	"strings"
 )
 
-type Json struct {}
-type HTTP struct{
-	json Json
-}
+type HTTP struct{}
 
 // tries to post json data to an URL and expects a json return
-func (c *Json) Post(url string, body map[string]string) (map[string]interface{}, error){
+func (c *HTTP) PostJson(url string, body any) (any, error){
 	jsonBody, _ := json.Marshal(body)
 	res, err := http.Post(url, "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
@@ -30,7 +27,7 @@ func (c *Json) Post(url string, body map[string]string) (map[string]interface{},
 		}
 		contentType := strings.Join(res.Header["Content-Type"], "")
 		if strings.HasPrefix(contentType, "application/json") {
-			var result map[string]interface{}
+			var result any
 			json.Unmarshal([]byte(body), &result)
 			return result, nil
 		}else{
@@ -42,7 +39,7 @@ func (c *Json) Post(url string, body map[string]string) (map[string]interface{},
 }
 
 // tries to get json data from an URL
-func (c *Json) Get(url string) (map[string]interface{}, error){
+func (c *HTTP) GetJson(url string) (any, error){
 	res, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -55,7 +52,7 @@ func (c *Json) Get(url string) (map[string]interface{}, error){
 		}
 		contentType := strings.Join(res.Header["Content-Type"], "")
 		if strings.HasPrefix(contentType, "application/json") {
-			var result map[string]interface{}
+			var result any
 			json.Unmarshal([]byte(body), &result)
 			return result, nil
 		}else{
