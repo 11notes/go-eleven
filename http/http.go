@@ -14,7 +14,7 @@ import (
 type HTTP struct{}
 
 // tries to post json data to an URL and expects a json return
-func (c *HTTP) PostJson(url string, body any, skipSSL bool) (any, error){
+func (c *HTTP) PostJson(url string, body any, skipSSL bool) ([]byte, error){
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipSSL},
 	}
@@ -32,9 +32,7 @@ func (c *HTTP) PostJson(url string, body any, skipSSL bool) (any, error){
 		}
 		contentType := strings.Join(res.Header["Content-Type"], "")
 		if strings.HasPrefix(contentType, "application/json") {
-			var result any
-			json.Unmarshal([]byte(body), &result)
-			return result, nil
+			return []byte(body), nil
 		}else{
 			return nil, errors.New(fmt.Sprintf("HTTP content-type is not json: %s", contentType))
 		}
@@ -44,7 +42,7 @@ func (c *HTTP) PostJson(url string, body any, skipSSL bool) (any, error){
 }
 
 // tries to get json data from an URL
-func (c *HTTP) GetJson(url string, skipSSL bool) (any, error){
+func (c *HTTP) GetJson(url string, skipSSL bool) ([]byte, error){
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipSSL},
 	}
@@ -61,9 +59,7 @@ func (c *HTTP) GetJson(url string, skipSSL bool) (any, error){
 		}
 		contentType := strings.Join(res.Header["Content-Type"], "")
 		if strings.HasPrefix(contentType, "application/json") {
-			var result any
-			json.Unmarshal([]byte(body), &result)
-			return result, nil
+			return []byte(body), nil
 		}else{
 			return nil, errors.New(fmt.Sprintf("HTTP content-type is not json: %s", contentType))
 		}
