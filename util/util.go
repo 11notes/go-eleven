@@ -90,12 +90,19 @@ func (c *Util) CommandLineArgumentExists(f string) bool{
 	return false
 }
 
-// checks if an environment variable exists and if not assigns a default value
+// checks if an environment variable exists and if not assigns a default value and returns it
 func (c *Util) GetEnv(key string, fallback string) string{
 	if value, ok := os.LookupEnv(key); ok {
 		return value
 	}
 	return fallback
+}
+
+// checks if an environment variable exists and if not assigns a set one
+func (c *Util) SetUnsetEnv(key string, value string){
+	if _, ok := os.LookupEnv(key); !ok {
+		os.Setenv(key, value)
+	}
 }
 
 // checks if a file containing an environment variable exists and if not assigns a default value
