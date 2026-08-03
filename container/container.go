@@ -3,9 +3,11 @@ package container
 import (
 	"errors"
 	"os"
+	"io"
 	"io/ioutil"
 	"strings"
 	"syscall"
+	"path/filepath"
 
 	"github.com/11notes/go-eleven/util"
 )
@@ -109,4 +111,56 @@ func (c *Container) RunAbsolute(bin string, args []string, env []string){
 	if err := syscall.Exec(bin, append([]string{bin}, args[:]...), append(os.Environ(), env[:]...)); err != nil {
 		(&util.Util{}).LogFatal("%s", err)
 	}
+}
+
+
+// copies missing source files to a destination recursively
+func copyFile(src, dst string, mode os.FileMode) error {
+	srcFile, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer srcFile.Close()
+
+	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+		return err
+	}
+
+	dstFile, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, mode)
+	if err != nil {
+		return err
+	}
+	defer dstFile.Close()
+
+	if _, err := io.Copy(dstFile, srcFile); err != nil {
+		return err
+	}
+
+	return dstFile.Sync()
+}
+
+func (c *Container) CopyMissingSourceFiles(src string, dst string) error{
+	return filepath.Walk(src, func(path string, info os.FileInfo, err error) error{
+		if err != nil{
+			return err
+		}
+
+		relPath, err := filepath.Rel(src, path)
+		if err != nil{
+			return err
+		}
+		targetPath := filepath.Join(dst, relPath)
+
+		if info.IsDir() {
+			return os.MkdirAll(targetPath, info.Mode())
+		}
+
+		if _, err := os.Stat(targetPath); err == nil {
+			return nil
+		} else if !os.IsNotExist(err) {
+			return err
+		}
+
+		return copyFile(path, targetPath, info.Mode())
+	})
 }
