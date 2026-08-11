@@ -261,3 +261,18 @@ func (c *Util) LookupIP(fqdn string) (string, error) {
 	}
 	return ips[0].String(), nil
 }
+
+// check if a folder is empty or not
+func (c *Util) IsDirEmpty(path string) bool{
+	f, err := os.Open(path)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+
+	_, err = f.Readdirnames(1)
+	if err == io.EOF {
+		return true
+	}
+	return false
+}
