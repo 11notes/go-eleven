@@ -77,6 +77,24 @@ func (c *Util) WriteFile(path string, txt string) error{
 	return nil
 }
 
+// copy file from source to destination and overwrite destination if it exists
+func (c *Util) CopyFile(src string, dst string) error{
+	srcFile, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer srcFile.Close()
+
+	dstFile, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		return err
+	}
+	defer dstFile.Close()
+
+	_, err = io.Copy(dstFile, srcFile)
+	return err
+}
+
 // checks if the command line argument exists (case-sensitive)
 func (c *Util) CommandLineArgumentExists(f string) bool{
 	if(len(os.Args) > 1){
