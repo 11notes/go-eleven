@@ -117,12 +117,13 @@ func (c *Container) RunAbsolute(bin string, args []string, env []string){
 // copies missing source files to a destination recursively
 func copyFile(src, dst string, mode os.FileMode) error {
 	srcFile, err := os.Open(src)
+	os.MkdirAll(dst, 0750)
 	if err != nil {
 		return err
 	}
 	defer srcFile.Close()
 
-	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(dst), 0750); err != nil {
 		return err
 	}
 
@@ -140,6 +141,7 @@ func copyFile(src, dst string, mode os.FileMode) error {
 }
 
 func (c *Container) CopyMissingSourceFiles(src string, dst string) error{
+	os.MkdirAll(dst, 0750)
 	return filepath.Walk(src, func(path string, info os.FileInfo, err error) error{
 		if err != nil{
 			return err
