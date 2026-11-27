@@ -20,6 +20,8 @@ import (
 
 type Util struct{}
 
+const asciiPrintable = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+
 var (
 	debug bool = false
 )
@@ -266,6 +268,29 @@ func (c *Util) GenerateRandomBase64(n int) (string, error) {
 		return "", err
 	}
 	return base64.StdEncoding.EncodeToString(b), nil
+}
+
+// generate random ASCII from n bytes
+func (c *Util) GenerateRandomASCII(n int) string {
+	const (
+		size  = byte(len(asciiPrintable))
+		limit = size * 2
+	)
+
+	out := make([]byte, 0, n)
+	for len(out) < n {
+		b, err := c.GenerateRandomBytes(n - len(out))
+		if err != nil {
+			return "", err
+		}
+		for _, v := range b {
+			if v < limit {
+				out = append(out, asciiPrintable[v%size])
+			}
+		}
+	}
+
+	return string(out)
 }
 
 // lookup an FQDN and return the first IP found
